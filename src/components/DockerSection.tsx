@@ -31,7 +31,7 @@ services:
     networks:
       - backend
     labels:
-      - "com.datadoghq.ad.logs=[{\"source\": \"java\", \"service\": \"order-service\"}]"
+      - "com.datadoghq.ad.logs=[{\\"source\\": \\"java\\", \\"service\\": \\"order-service\\"}]"
 
   # ============================================
   # Node.js Microservice
@@ -55,39 +55,6 @@ services:
         condition: service_healthy
     networks:
       - backend
-
-  # ============================================
-  # Oracle SOA Suite 12c
-  # ============================================
-  soa-suite:
-    image: container-registry.oracle.com/middleware/soasuite:12.2.1.4
-    ports:
-      - "7001:7001"   # Admin Server
-      - "8001:8001"   # SOA Server
-      - "9001:9001"   # OSB Server
-    environment:
-      - ADMIN_HOST=soa-suite
-      - ADMIN_PORT=7001
-      - ADMIN_USERNAME=weblogic
-      - ADMIN_PASSWORD=\${WLS_ADMIN_PASSWORD:-Welcome1}
-      - DOMAIN_NAME=soa_domain
-      - CONNECTION_STRING=oracle-db:1521/ORCLPDB1
-      - DB_USER=soa_user
-      - DB_PASSWORD=\${ORACLE_SOA_PASSWORD:-Welcome1}
-    volumes:
-      - soa-domain:/u01/oracle/user_projects/domains
-      - ./soa-deployments:/u01/oracle/deployments
-    depends_on:
-      oracle-db:
-        condition: service_healthy
-    networks:
-      - backend
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7001/console"]
-      interval: 60s
-      timeout: 30s
-      retries: 10
-      start_period: 600s
 
   # ============================================
   # Oracle Database 19c
@@ -196,7 +163,6 @@ services:
 volumes:
   postgres-data:
   oracle-data:
-  soa-domain:
   rabbitmq-data:
 
 networks:
@@ -212,25 +178,23 @@ const javaDockerfileCode = `# ============================================
 FROM eclipse-temurin:17-jdk-alpine AS builder
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache gradle
+# Install Maven
+RUN apk add --no-cache maven
 
-# Copy gradle files for dependency caching
-COPY gradle gradle
-COPY build.gradle settings.gradle gradlew ./
-RUN chmod +x gradlew
+# Copy pom.xml for dependency caching
+COPY pom.xml ./
 
 # Download dependencies (cached layer)
-RUN ./gradlew dependencies --no-daemon
+RUN mvn dependency:go-offline -B
 
 # Copy source code
 COPY src src
 
 # Build application
-RUN ./gradlew build -x test --no-daemon
+RUN mvn clean package -DskipTests -B
 
 # Extract layers for better caching
-RUN java -Djarmode=layertools -jar build/libs/*.jar extract
+RUN java -Djarmode=layertools -jar target/*.jar extract
 
 # ============================================
 # Stage 2: Production
@@ -360,6 +324,7 @@ stages:
 variables:
   DOCKER_REGISTRY: registry.gitlab.com/\$CI_PROJECT_PATH
   DOCKER_TLS_CERTDIR: "/certs"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 # ============================================
 # Testing Stage
@@ -372,16 +337,19 @@ variables:
 test-java:
   <<: *test-template
   image: eclipse-temurin:17-jdk-alpine
+  cache:
+    paths:
+      - .m2/repository
   script:
     - cd order-service
-    - ./gradlew test jacocoTestReport
+    - mvn test jacoco:report -B
   coverage: '/Total.*?([0-9]{1,3})%/'
   artifacts:
     reports:
-      junit: order-service/build/test-results/test/*.xml
+      junit: order-service/target/surefire-reports/*.xml
       coverage_report:
         coverage_format: cobertura
-        path: order-service/build/reports/jacoco/test/jacocoTestReport.xml
+        path: order-service/target/site/jacoco/jacoco.xml
 
 test-nodejs:
   <<: *test-template
@@ -656,9 +624,9 @@ const DockerSection = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
             { label: "Java + Node.js", desc: "Microservices" },
-            { label: "Oracle SOA 12c", desc: "Integration Suite" },
             { label: "Oracle + PostgreSQL", desc: "Databases" },
             { label: "RabbitMQ", desc: "Messaging" },
+            { label: "Maven", desc: "Build Tool" },
             { label: "GitLab CI/CD", desc: "Pipelines" },
             { label: "Datadog", desc: "Observability" },
             { label: "Multi-stage", desc: "Optimized builds" },
@@ -712,7 +680,6 @@ const DockerSection = () => {
               </h3>
               <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                 <li>Java & Node.js microservices with health checks</li>
-                <li>Oracle SOA Suite 12c with WebLogic domain</li>
                 <li>Oracle Database 19c and PostgreSQL 15</li>
                 <li>RabbitMQ with management UI</li>
                 <li>Datadog agent for APM and logs</li>
@@ -728,10 +695,11 @@ const DockerSection = () => {
           <TabsContent value="java-docker" className="space-y-4">
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-primary font-mono">
-                Optimized Java Dockerfile
+                Optimized Java Dockerfile (Maven)
               </h3>
               <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                 <li>Multi-stage build with layer extraction</li>
+                <li>Maven for dependency management</li>
                 <li>Container-aware JVM settings</li>
                 <li>Datadog APM integration</li>
                 <li>Non-root security</li>
@@ -769,7 +737,7 @@ const DockerSection = () => {
                 GitLab CI/CD Pipeline
               </h3>
               <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Parallel testing for Java and Node.js</li>
+                <li>Parallel testing for Java (Maven) and Node.js</li>
                 <li>Security scanning (Trivy, OWASP, SAST)</li>
                 <li>Docker build with caching</li>
                 <li>Kubernetes deployment with rollout status</li>
