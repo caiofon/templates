@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { href: "#skills", label: "Skills" },
+  { href: "#experience", label: "Experience" },
   { href: "#best-practices", label: "Best Practices" },
+  { href: "#soa", label: "SOA" },
+  { href: "#database", label: "Database" },
   { href: "#rabbitmq", label: "RabbitMQ" },
   { href: "#docker", label: "Docker" },
   { href: "#contact", label: "Contact" },
@@ -25,7 +28,7 @@ const Navigation = () => {
           </a>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-4">
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -41,7 +44,7 @@ const Navigation = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="lg:hidden"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -50,8 +53,8 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col gap-3">
+          <div className="lg:hidden py-4 border-t border-border">
+            <div className="flex flex-col gap-2">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
