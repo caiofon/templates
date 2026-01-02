@@ -3,11 +3,7 @@ import Hero from "@/components/Hero";
 import SkillsSection from "@/components/SkillsSection";
 import ExperienceTimeline from "@/components/ExperienceTimeline";
 import BestPracticesSection from "@/components/BestPracticesSection";
-import TestingSection from "@/components/TestingSection";
-import SOASection from "@/components/SOASection";
 import DatabaseSection from "@/components/DatabaseSection";
-import RabbitMQSection from "@/components/RabbitMQSection";
-import SecurityCVESection from "@/components/SecurityCVESection";
 import DockerSection from "@/components/DockerSection";
 import ContactSection from "@/components/ContactSection";
 
@@ -16,27 +12,12 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <main>
-        {/* Overview */}
         <Hero />
         <SkillsSection />
         <ExperienceTimeline />
-        
-        {/* Development */}
         <BestPracticesSection />
-        <TestingSection />
-        
-        {/* Integration */}
-        <SOASection />
-        <RabbitMQSection />
-        
-        {/* Data */}
         <DatabaseSection />
-        
-        {/* DevOps */}
-        <SecurityCVESection />
         <DockerSection />
-        
-        {/* Contact */}
         <ContactSection />
       </main>
 

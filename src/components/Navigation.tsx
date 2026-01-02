@@ -1,53 +1,14 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Terminal, ChevronDown } from "lucide-react";
+import { Menu, X, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
 
-const navSections = [
-  {
-    label: "Overview",
-    items: [
-      { href: "#skills", label: "Skills & Expertise" },
-      { href: "#experience", label: "Experience" },
-    ],
-  },
-  {
-    label: "Development",
-    items: [
-      { href: "#best-practices", label: "Best Practices" },
-      { href: "#testing", label: "Testing" },
-    ],
-  },
-  {
-    label: "Integration",
-    items: [
-      { href: "#soa", label: "Oracle SOA" },
-      { href: "#rabbitmq", label: "RabbitMQ" },
-    ],
-  },
-  {
-    label: "Data",
-    items: [
-      { href: "#database", label: "Database & PL/SQL" },
-    ],
-  },
-  {
-    label: "DevOps",
-    items: [
-      { href: "#security", label: "Security & CVE" },
-      { href: "#docker", label: "Docker & CI/CD" },
-    ],
-  },
+const navLinks = [
+  { href: "#skills", label: "Skills" },
+  { href: "#experience", label: "Experience" },
+  { href: "#best-practices", label: "Code Templates" },
+  { href: "#database", label: "Database" },
+  { href: "#docker", label: "DevOps" },
 ];
-
-const flatNavLinks = navSections.flatMap(section => section.items);
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,8 +19,7 @@ const Navigation = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
       
-      // Detect active section
-      const sections = flatNavLinks.map(link => link.href.substring(1));
+      const sections = navLinks.map(link => link.href.substring(1));
       for (const sectionId of sections.reverse()) {
         const element = document.getElementById(sectionId);
         if (element) {
@@ -82,108 +42,61 @@ const Navigation = () => {
     }`}>
       <div className="container max-w-6xl px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <a href="#" className="flex items-center gap-2 font-mono text-lg font-bold group">
             <Terminal className="w-5 h-5 text-primary group-hover:animate-pulse" />
             <span className="text-primary">CF</span>
             <span className="text-muted-foreground">/dev</span>
           </a>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navSections.map((section) => (
-              <DropdownMenu key={section.label}>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    className="font-mono text-sm text-muted-foreground hover:text-primary hover:bg-secondary/50 gap-1"
-                  >
-                    {section.label}
-                    <ChevronDown className="w-3 h-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-card border-border">
-                  <DropdownMenuLabel className="font-mono text-xs text-muted-foreground">
-                    {section.label}
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {section.items.map((item) => (
-                    <DropdownMenuItem key={item.href} asChild>
-                      <a
-                        href={item.href}
-                        className={`font-mono text-sm cursor-pointer ${
-                          activeSection === item.href.substring(1) 
-                            ? "text-primary" 
-                            : "text-foreground"
-                        }`}
-                      >
-                        <span className="text-primary mr-2">#</span>
-                        {item.label}
-                      </a>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className={`px-3 py-2 font-mono text-sm rounded-md transition-colors ${
+                  activeSection === link.href.substring(1)
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-primary hover:bg-secondary/50"
+                }`}
+              >
+                {link.label}
+              </a>
             ))}
-            
-            <Button
-              asChild
-              size="sm"
-              className="ml-4 bg-primary text-primary-foreground hover:bg-primary/90 font-mono"
-            >
+            <Button size="sm" className="ml-4 font-mono" asChild>
               <a href="#contact">Contact</a>
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="md:hidden"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
 
-        {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden py-4 border-t border-border max-h-[80vh] overflow-y-auto">
-            <div className="space-y-4">
-              {navSections.map((section) => (
-                <div key={section.label} className="space-y-2">
-                  <p className="px-4 text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                    {section.label}
-                  </p>
-                  <div className="space-y-1">
-                    {section.items.map((item) => (
-                      <a
-                        key={item.href}
-                        href={item.href}
-                        className={`flex items-center px-4 py-2 text-sm font-mono rounded-lg transition-colors ${
-                          activeSection === item.href.substring(1)
-                            ? "text-primary bg-secondary/50"
-                            : "text-muted-foreground hover:text-primary hover:bg-secondary/50"
-                        }`}
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <span className="text-primary mr-2">#</span>
-                        {item.label}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              
-              <div className="px-4 pt-4 border-t border-border">
-                <Button
-                  asChild
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-mono"
+          <div className="md:hidden py-4 border-t border-border">
+            <div className="flex flex-col gap-2">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
                   onClick={() => setIsOpen(false)}
+                  className={`px-3 py-2 font-mono text-sm rounded-md ${
+                    activeSection === link.href.substring(1)
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground"
+                  }`}
                 >
-                  <a href="#contact">Contact Me</a>
-                </Button>
-              </div>
+                  {link.label}
+                </a>
+              ))}
+              <Button size="sm" className="mt-2 font-mono" asChild>
+                <a href="#contact" onClick={() => setIsOpen(false)}>Contact</a>
+              </Button>
             </div>
           </div>
         )}
