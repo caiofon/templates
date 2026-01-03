@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Workflow, GitBranch, Layers } from "lucide-react";
+import { Workflow, GitBranch, Layers, Server } from "lucide-react";
 import CodeBlock from "./CodeBlock";
 
 const osbProxyCode = `<?xml version="1.0" encoding="UTF-8"?>
@@ -281,7 +281,7 @@ const SOASection = () => {
         </div>
 
         {/* Architecture Overview */}
-        <div className="grid md:grid-cols-3 gap-4 mb-10">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           <Card className="bg-card border-border card-hover">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-mono flex items-center gap-2">
@@ -332,6 +332,24 @@ const SOASection = () => {
                 <li>Mediator routing patterns</li>
                 <li>JCA/DB/File adapters</li>
                 <li>Error handling & recovery</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border card-hover border-accent/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-mono flex items-center gap-2">
+                <Server className="w-4 h-4 text-terminal-purple" />
+                WebLogic Server
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs text-muted-foreground space-y-2">
+              <p>Enterprise application server administration</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Domain & cluster management</li>
+                <li>WLST scripting automation</li>
+                <li>DataSource & JMS configuration</li>
+                <li>Deployment & Node Manager</li>
               </ul>
             </CardContent>
           </Card>
