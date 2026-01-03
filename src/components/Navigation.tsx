@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 const navLinks = [
   { href: "#skills", label: "Skills" },
   { href: "#experience", label: "Experience" },
-  { href: "#best-practices", label: "Code Templates" },
+  { href: "#best-practices", label: "Code & SOLID" },
   { href: "#database", label: "Database" },
+  { href: "#tools", label: "Tools" },
   { href: "#docker", label: "DevOps" },
 ];
 
@@ -41,19 +42,19 @@ const Navigation = () => {
       scrolled ? "bg-background/95 backdrop-blur-md border-b border-border shadow-lg" : "bg-background/80 backdrop-blur-md border-b border-border"
     }`}>
       <div className="container max-w-6xl px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14">
           <a href="#" className="flex items-center gap-2 font-mono text-lg font-bold group">
             <Terminal className="w-5 h-5 text-primary group-hover:animate-pulse" />
             <span className="text-primary">CF</span>
             <span className="text-muted-foreground">/dev</span>
           </a>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-0.5">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-2 font-mono text-sm rounded-md transition-colors ${
+                className={`px-2.5 py-1.5 font-mono text-xs rounded-md transition-colors ${
                   activeSection === link.href.substring(1)
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-primary hover:bg-secondary/50"
@@ -62,7 +63,7 @@ const Navigation = () => {
                 {link.label}
               </a>
             ))}
-            <Button size="sm" className="ml-4 font-mono" asChild>
+            <Button size="sm" className="ml-3 font-mono text-xs h-7" asChild>
               <a href="#contact">Contact</a>
             </Button>
           </div>
@@ -70,16 +71,16 @@ const Navigation = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden h-8 w-8"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </Button>
         </div>
 
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col gap-2">
+          <div className="md:hidden py-3 border-t border-border">
+            <div className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
