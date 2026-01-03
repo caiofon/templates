@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import JavaExamples from "./examples/JavaExamples";
 import NodeExamples from "./examples/NodeExamples";
+import SOLIDPrinciples from "./examples/SOLIDPrinciples";
 
 const BestPracticesSection = () => {
   return (
@@ -11,25 +12,35 @@ const BestPracticesSection = () => {
             <span className="text-primary">#</span> Best Practices & Templates
           </h2>
           <p className="text-muted-foreground max-w-2xl">
-            Production-ready code templates for microservices. Click to expand examples.
+            Production-ready code templates. SOLID principles, Java 8/11/17, Node.js/TypeScript patterns.
           </p>
         </div>
 
-        <Tabs defaultValue="java" className="w-full">
-          <TabsList className="bg-secondary border border-border mb-6">
+        <Tabs defaultValue="solid" className="w-full">
+          <TabsList className="bg-secondary border border-border mb-6 flex-wrap h-auto gap-1">
+            <TabsTrigger 
+              value="solid" 
+              className="font-mono text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              SOLID Principles
+            </TabsTrigger>
             <TabsTrigger 
               value="java" 
-              className="font-mono data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="font-mono text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               Java (8/11/17)
             </TabsTrigger>
             <TabsTrigger 
               value="node" 
-              className="font-mono data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="font-mono text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               Node.js / TypeScript
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="solid">
+            <SOLIDPrinciples />
+          </TabsContent>
 
           <TabsContent value="java">
             <JavaExamples />
