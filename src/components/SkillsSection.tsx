@@ -28,8 +28,8 @@ const skills = [
   },
   {
     icon: Container,
-    title: "Docker & K8s",
-    description: "Containerization, Docker Compose, and cloud-native deployments",
+    title: "Docker",
+    description: "Containerization, Docker Compose, Podman, and multi-stage builds",
     color: "text-primary",
   },
   {
