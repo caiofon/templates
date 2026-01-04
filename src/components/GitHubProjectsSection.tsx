@@ -25,7 +25,7 @@ const javaProjects: Project[] = [
       "Multi-stage Dockerfile",
       "Unit and integration tests with Testcontainers"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/java/spring-boot-microservice-template"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/java/spring-boot-microservice-template"
   },
   {
     name: "rabbitmq-event-driven-architecture",
@@ -39,7 +39,7 @@ const javaProjects: Project[] = [
       "Retry policies and circuit breaker",
       "Monitoring with RabbitMQ Management"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/java/rabbitmq-event-driven-architecture"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/java/rabbitmq-event-driven-architecture"
   },
   {
     name: "spring-batch-etl-processor",
@@ -53,7 +53,7 @@ const javaProjects: Project[] = [
       "Database partitioning for large datasets",
       "Batch metrics and monitoring"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/java/spring-batch-etl-processor"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/java/spring-batch-etl-processor"
   }
 ];
 
@@ -70,7 +70,7 @@ const nodeProjects: Project[] = [
       "Swagger/OpenAPI documentation",
       "E2E testing with Jest and Supertest"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/nodejs/nestjs-rest-api-template"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/nodejs/nestjs-rest-api-template"
   },
   {
     name: "express-graphql-server",
@@ -84,7 +84,7 @@ const nodeProjects: Project[] = [
       "Query complexity analysis",
       "GraphQL Playground integration"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/nodejs/express-graphql-server"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/nodejs/express-graphql-server"
   },
   {
     name: "nodejs-websocket-realtime",
@@ -98,7 +98,7 @@ const nodeProjects: Project[] = [
       "Connection heartbeat and reconnection",
       "Event-driven architecture"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/nodejs/nodejs-websocket-realtime"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/nodejs/nodejs-websocket-realtime"
   }
 ];
 
@@ -115,7 +115,7 @@ const reactProjects: Project[] = [
       "Form validation with React Hook Form",
       "Lazy loading and code splitting"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/react/react-admin-dashboard"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/react/react-admin-dashboard"
   },
   {
     name: "react-ecommerce-storefront",
@@ -129,7 +129,7 @@ const reactProjects: Project[] = [
       "Order history and tracking",
       "Responsive mobile-first design"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/react/react-ecommerce-storefront"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/react/react-ecommerce-storefront"
   },
   {
     name: "react-auth-boilerplate",
@@ -143,7 +143,7 @@ const reactProjects: Project[] = [
       "Remember me functionality",
       "Password reset flow"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/react/react-auth-boilerplate"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/react/react-auth-boilerplate"
   }
 ];
 
@@ -160,7 +160,7 @@ const angularProjects: Project[] = [
       "Reactive forms with validation",
       "Internationalization (i18n)"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/angular/angular-admin-panel"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/angular/angular-admin-panel"
   },
   {
     name: "angular-landing-page",
@@ -174,7 +174,7 @@ const angularProjects: Project[] = [
       "Contact form with validation",
       "Performance-optimized bundle"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/angular/angular-landing-page"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/angular/angular-landing-page"
   },
   {
     name: "angular-crud-generator",
@@ -188,7 +188,7 @@ const angularProjects: Project[] = [
       "Export to CSV/Excel",
       "Pagination and sorting"
     ],
-    repoUrl: "https://github.com/caiofon/templates/tree/main/angular/angular-crud-generator"
+    repoUrl: "https://github.com/caiofon/templates/tree/main/templates/angular/angular-crud-generator"
   }
 ];
 
