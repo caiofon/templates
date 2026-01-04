@@ -1,4 +1,4 @@
-# Spring Boot Microservice Template
+# Spring Boot Microservice Template v1.0
 
 Production-ready microservice template with Spring Boot 3, Docker, and CI/CD.
 
