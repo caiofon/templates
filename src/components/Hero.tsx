@@ -25,7 +25,7 @@ const Hero = () => {
               <span className="gradient-text">Caio Fonseca</span>
             </h1>
             <h2 className="text-lg md:text-xl text-muted-foreground font-mono leading-relaxed">
-              <span className="text-primary">&gt;</span> Senior Full Stack Engineer | Java & Node.js | React & Angular | GitLab | Microservices | AI-Driven-Development
+              <span className="text-primary">&gt;</span> Senior Backend Integration Engineer | Java & Node.js | GitLab | Microservices | AI-Driven-Development
             </h2>
           </div>
 
