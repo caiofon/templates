@@ -74,5 +74,6 @@ MIT License - Feel free to use this as a template for your own portfolio.
 ## 📫 Contact
 
 - **LinkedIn**: [linkedin.com/in/caio-fonseca](https://linkedin.com/in/caio-fonseca)
-- **GitHub**: [github.com/caio-fonseca](https://github.com/caio-fonseca)
+- **GitHub**: [github.com/caiofon](https://github.com/caiofon)
+- **Email**: caio.fonseca@email.com
 - **Email**: caio.fonseca@email.com
