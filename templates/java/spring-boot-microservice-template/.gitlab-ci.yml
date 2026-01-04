@@ -1,0 +1,127 @@
+stages:
+  - build
+  - test
+  - quality
+  - package
+  - deploy
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  DOCKER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+cache:
+  paths:
+    - .m2/repository
+
+# Build Stage
+build:
+  stage: build
+  image: eclipse-temurin:17-jdk
+  script:
+    - ./mvnw clean compile -B
+  artifacts:
+    paths:
+      - target/classes
+    expire_in: 1 hour
+
+# Unit Tests
+unit-tests:
+  stage: test
+  image: eclipse-temurin:17-jdk
+  script:
+    - ./mvnw test -B
+  artifacts:
+    reports:
+      junit: target/surefire-reports/*.xml
+    paths:
+      - target/site/jacoco
+    expire_in: 1 week
+
+# Integration Tests
+integration-tests:
+  stage: test
+  image: eclipse-temurin:17-jdk
+  services:
+    - postgres:15-alpine
+    - docker:dind
+  variables:
+    POSTGRES_DB: testdb
+    POSTGRES_USER: test
+    POSTGRES_PASSWORD: test
+    DOCKER_HOST: tcp://docker:2375
+    TESTCONTAINERS_RYUK_DISABLED: "true"
+  script:
+    - ./mvnw verify -Pintegration-tests -B
+  artifacts:
+    reports:
+      junit: target/failsafe-reports/*.xml
+    expire_in: 1 week
+
+# Code Quality - SonarQube
+sonar:
+  stage: quality
+  image: eclipse-temurin:17-jdk
+  script:
+    - ./mvnw sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -B
+  only:
+    - main
+    - develop
+  allow_failure: true
+
+# Security Scan - OWASP Dependency Check
+dependency-check:
+  stage: quality
+  image: eclipse-temurin:17-jdk
+  script:
+    - ./mvnw org.owasp:dependency-check-maven:check -B
+  artifacts:
+    paths:
+      - target/dependency-check-report.html
+    expire_in: 1 week
+  allow_failure: true
+
+# Build Docker Image
+docker-build:
+  stage: package
+  image: docker:24
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $DOCKER_IMAGE .
+    - docker push $DOCKER_IMAGE
+    - docker tag $DOCKER_IMAGE $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+    - tags
+
+# Deploy to Development
+deploy-dev:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - kubectl config use-context development
+    - kubectl set image deployment/microservice app=$DOCKER_IMAGE -n development
+    - kubectl rollout status deployment/microservice -n development
+  environment:
+    name: development
+    url: https://dev.example.com
+  only:
+    - develop
+
+# Deploy to Production
+deploy-prod:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - kubectl config use-context production
+    - kubectl set image deployment/microservice app=$DOCKER_IMAGE -n production
+    - kubectl rollout status deployment/microservice -n production
+  environment:
+    name: production
+    url: https://example.com
+  only:
+    - tags
+  when: manual
