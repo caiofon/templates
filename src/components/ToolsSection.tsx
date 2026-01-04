@@ -3,6 +3,7 @@ import SetupGuides from "./examples/SetupGuides";
 import VersionsGuide from "./examples/VersionsGuide";
 import CommandsReference from "./examples/CommandsReference";
 import SQLBestPractices from "./examples/SQLBestPractices";
+import FrontendExamples from "./examples/FrontendExamples";
 
 const ToolsSection = () => {
   return (
@@ -13,7 +14,7 @@ const ToolsSection = () => {
             <span className="text-primary">#</span> Tools & References
           </h2>
           <p className="text-muted-foreground max-w-2xl">
-            Setup de IDEs, versões de linguagens, comandos essenciais e boas práticas SQL.
+            Setup de IDEs, versões de linguagens, comandos essenciais, frontend frameworks e boas práticas SQL.
           </p>
         </div>
 
@@ -38,6 +39,12 @@ const ToolsSection = () => {
               Linux/Git/SVN
             </TabsTrigger>
             <TabsTrigger 
+              value="frontend" 
+              className="font-mono text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              React/Angular
+            </TabsTrigger>
+            <TabsTrigger 
               value="sql" 
               className="font-mono text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
@@ -55,6 +62,10 @@ const ToolsSection = () => {
 
           <TabsContent value="commands">
             <CommandsReference />
+          </TabsContent>
+
+          <TabsContent value="frontend">
+            <FrontendExamples />
           </TabsContent>
 
           <TabsContent value="sql">

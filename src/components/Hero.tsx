@@ -24,8 +24,8 @@ const Hero = () => {
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
               <span className="gradient-text">Caio Fonseca</span>
             </h1>
-            <h2 className="text-xl md:text-2xl text-muted-foreground font-mono">
-              <span className="text-primary">&gt;</span> Senior Backend Integration Engineer
+            <h2 className="text-lg md:text-xl text-muted-foreground font-mono leading-relaxed">
+              <span className="text-primary">&gt;</span> Senior Full Stack Engineer | Java & Node.js | React & Angular | GitLab | Microservices | AI-Driven-Development
             </h2>
           </div>
 
@@ -39,7 +39,7 @@ const Hero = () => {
 
           {/* Tech stack highlights */}
           <div className="flex flex-wrap gap-2 pt-4">
-            {["Java", "Node.js", "RabbitMQ", "Docker", "GitLab CI/CD", "Datadog"].map((tech) => (
+            {["Java", "Spring Boot", "Node.js", "NestJS", "React", "Angular", "Docker", "GitLab CI/CD"].map((tech) => (
               <span
                 key={tech}
                 className="px-3 py-1 bg-secondary rounded-full text-sm font-mono text-secondary-foreground border border-border"
