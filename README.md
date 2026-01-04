@@ -1,6 +1,10 @@
-# Caio Fonseca - Senior Full Stack Engineer Portfolio
+# Caio Fonseca - Senior Backend Integration Engineer | Portfolio
 
-Portfolio profissional showcasing expertise in enterprise integration, full-stack development, and DevOps practices.
+Professional portfolio showcasing expertise in enterprise integration, full-stack development, and DevOps practices.
+
+## 📂 Project Templates
+
+This repository contains 12 production-ready project templates organized by technology stack in the `templates/` folder.
 
 ## 🚀 Technologies
 
