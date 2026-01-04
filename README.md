@@ -1,73 +1,78 @@
-# Welcome to your Lovable project
+# Caio Fonseca - Senior Full Stack Engineer Portfolio
 
-## Project info
+Portfolio profissional showcasing expertise in enterprise integration, full-stack development, and DevOps practices.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Technologies
 
-## How can I edit this code?
+### Backend
+- **Java**: Spring Boot, Spring Cloud, JPA/Hibernate, Maven
+- **Node.js**: NestJS, Express, Prisma, TypeORM
+- **Oracle SOA Suite**: OSB, BPM, BPEL, WebLogic Server
 
-There are several ways of editing your application.
+### Frontend
+- **React**: TypeScript, Vite, TailwindCSS, shadcn/ui
+- **Angular**: TypeScript, RxJS, Angular Material
 
-**Use Lovable**
+### DevOps & Infrastructure
+- **Containers**: Docker, Docker Compose, Podman
+- **CI/CD**: GitLab Pipelines, GitHub Actions
+- **Messaging**: RabbitMQ, Apache Kafka
+- **Monitoring**: Datadog APM, ELK Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Databases
+- **Relational**: Oracle, PostgreSQL, MySQL
+- **NoSQL**: MongoDB, Redis
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📂 Featured GitHub Projects
 
-**Use your preferred IDE**
+### Java Projects
+1. **spring-boot-microservice-template** - Production-ready microservice with Spring Boot 3, Docker, and GitLab CI/CD
+2. **rabbitmq-event-driven-architecture** - Event-driven architecture with RabbitMQ, DLQ, and retry patterns
+3. **spring-batch-etl-processor** - Batch processing with Spring Batch, scheduling, and monitoring
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Node.js Projects
+1. **nestjs-rest-api-template** - NestJS REST API with Prisma, JWT auth, and Swagger documentation
+2. **express-graphql-server** - GraphQL API with Express, Apollo Server, and TypeScript
+3. **nodejs-websocket-realtime** - Real-time WebSocket server with Socket.io and Redis pub/sub
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### React Projects
+1. **react-admin-dashboard** - Admin dashboard with React, TypeScript, Recharts, and TailwindCSS
+2. **react-ecommerce-storefront** - E-commerce frontend with cart, checkout, and payment integration
+3. **react-auth-boilerplate** - Authentication system with JWT, refresh tokens, and protected routes
 
-Follow these steps:
+### Angular Projects
+1. **angular-admin-panel** - Admin panel with Angular Material, NgRx, and lazy loading
+2. **angular-landing-page** - Responsive landing page with animations and SEO optimization
+3. **angular-crud-generator** - Dynamic CRUD application with forms and validation
+
+## 🛠️ Local Development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clone the repository
+git clone https://github.com/caio-fonseca/portfolio.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to project directory
+cd portfolio
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 📦 Build for Production
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run build
+```
 
-**Use GitHub Codespaces**
+## 📄 License
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+MIT License - Feel free to use this as a template for your own portfolio.
 
-## What technologies are used for this project?
+## 📫 Contact
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **LinkedIn**: [linkedin.com/in/caio-fonseca](https://linkedin.com/in/caio-fonseca)
+- **GitHub**: [github.com/caio-fonseca](https://github.com/caio-fonseca)
+- **Email**: caio.fonseca@email.com

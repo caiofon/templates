@@ -2,6 +2,7 @@ import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import SkillsSection from "@/components/SkillsSection";
 import ExperienceTimeline from "@/components/ExperienceTimeline";
+import GitHubProjectsSection from "@/components/GitHubProjectsSection";
 import BestPracticesSection from "@/components/BestPracticesSection";
 import DatabaseSection from "@/components/DatabaseSection";
 import ToolsSection from "@/components/ToolsSection";
@@ -16,6 +17,7 @@ const Index = () => {
         <Hero />
         <SkillsSection />
         <ExperienceTimeline />
+        <GitHubProjectsSection />
         <BestPracticesSection />
         <DatabaseSection />
         <ToolsSection />
@@ -35,7 +37,9 @@ const Index = () => {
               <span className="text-primary">•</span>
               <span>Node.js</span>
               <span className="text-primary">•</span>
-              <span>Oracle SOA</span>
+              <span>React</span>
+              <span className="text-primary">•</span>
+              <span>Angular</span>
               <span className="text-primary">•</span>
               <span>Docker</span>
             </div>
