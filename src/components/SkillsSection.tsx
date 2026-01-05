@@ -1,5 +1,6 @@
-import { Server, MessageSquare, Container, GitBranch, Eye, Shield, Database, Workflow, Sparkles, FlaskConical } from "lucide-react";
+import { Server, MessageSquare, Container, GitBranch, Eye, Shield, Database, Workflow, Sparkles, FlaskConical, Code2, Blocks } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const skills = [
   {
@@ -17,7 +18,7 @@ const skills = [
   {
     icon: Database,
     title: "Databases",
-    description: "Oracle, PostgreSQL, PL/SQL packages, and performance tuning",
+    description: "Oracle, PostgreSQL, DB2/AS400, MySQL, SQL Server, and PL/SQL",
     color: "text-terminal-yellow",
   },
   {
@@ -62,6 +63,20 @@ const skills = [
     description: "GitLab Duo, GitHub Copilot for enhanced development productivity",
     color: "text-terminal-purple",
   },
+  {
+    icon: Code2,
+    title: "Frontend",
+    description: "React, Angular, TypeScript, state management and modern UI",
+    color: "text-terminal-cyan",
+    enthusiast: true,
+  },
+  {
+    icon: Blocks,
+    title: "Smart Contracts",
+    description: "Solidity, Hardhat, Ethereum, Web3.js and blockchain development",
+    color: "text-terminal-orange",
+    enthusiast: true,
+  },
 ];
 
 const SkillsSection = () => {
@@ -77,13 +92,21 @@ const SkillsSection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {skills.map((skill, index) => (
             <Card
               key={skill.title}
-              className="card-hover bg-card border-border"
+              className="card-hover bg-card border-border relative"
               style={{ animationDelay: `${index * 100}ms` }}
             >
+              {'enthusiast' in skill && skill.enthusiast && (
+                <Badge 
+                  variant="outline" 
+                  className="absolute top-2 right-2 text-[10px] bg-terminal-purple/10 text-terminal-purple border-terminal-purple/30"
+                >
+                  Enthusiast
+                </Badge>
+              )}
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg bg-secondary ${skill.color}`}>
