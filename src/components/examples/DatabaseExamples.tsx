@@ -1079,6 +1079,891 @@ BEGIN
 END;
 /`;
 
+// DB2 for AS400 / IBM i
+const db2AS400 = `-- DB2 for AS400 / IBM i - SQL Examples
+-- =====================================
+
+-- 1. Create Table with Identity
+CREATE TABLE orders (
+    order_id INTEGER GENERATED ALWAYS AS IDENTITY 
+        (START WITH 1 INCREMENT BY 1),
+    customer_id INTEGER NOT NULL,
+    order_date DATE DEFAULT CURRENT_DATE,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    total_amount DECIMAL(15,2),
+    CONSTRAINT pk_orders PRIMARY KEY (order_id)
+);
+
+-- 2. Create Index with Encoded Vector Index (EVI)
+CREATE ENCODED VECTOR INDEX idx_orders_status 
+    ON orders (status);
+
+-- 3. Query with OLAP functions
+SELECT 
+    customer_id,
+    order_date,
+    total_amount,
+    SUM(total_amount) OVER (
+        PARTITION BY customer_id 
+        ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total,
+    RANK() OVER (
+        PARTITION BY customer_id 
+        ORDER BY total_amount DESC
+    ) AS order_rank
+FROM orders
+WHERE YEAR(order_date) = YEAR(CURRENT_DATE);
+
+-- 4. Stored Procedure with RPGLE call
+CREATE OR REPLACE PROCEDURE process_order (
+    IN p_order_id INTEGER,
+    OUT p_result_code INTEGER,
+    OUT p_message VARCHAR(256)
+)
+LANGUAGE SQL
+MODIFIES SQL DATA
+BEGIN
+    DECLARE v_status VARCHAR(20);
+    DECLARE v_total DECIMAL(15,2);
+    DECLARE SQLCODE INTEGER DEFAULT 0;
+    DECLARE SQLSTATE CHAR(5) DEFAULT '00000';
+    
+    -- Get order details
+    SELECT status, total_amount 
+    INTO v_status, v_total
+    FROM orders 
+    WHERE order_id = p_order_id;
+    
+    IF SQLCODE = 100 THEN
+        SET p_result_code = -1;
+        SET p_message = 'Order not found';
+        RETURN;
+    END IF;
+    
+    IF v_status = 'COMPLETED' THEN
+        SET p_result_code = -2;
+        SET p_message = 'Order already completed';
+        RETURN;
+    END IF;
+    
+    -- Update order
+    UPDATE orders 
+    SET status = 'PROCESSING',
+        processed_at = CURRENT_TIMESTAMP
+    WHERE order_id = p_order_id;
+    
+    -- Call RPGLE program for business logic
+    CALL QSYS2.QCMDEXC('CALL PGM(MYLIB/ORDPROC) PARM(' 
+        || CHAR(p_order_id) || ')');
+    
+    SET p_result_code = 0;
+    SET p_message = 'Order processed successfully';
+END;
+
+-- 5. User Defined Table Function
+CREATE OR REPLACE FUNCTION get_customer_orders (
+    p_customer_id INTEGER
+)
+RETURNS TABLE (
+    order_id INTEGER,
+    order_date DATE,
+    status VARCHAR(20),
+    total_amount DECIMAL(15,2),
+    days_since_order INTEGER
+)
+LANGUAGE SQL
+READS SQL DATA
+BEGIN ATOMIC
+    RETURN SELECT 
+        order_id,
+        order_date,
+        status,
+        total_amount,
+        DAYS(CURRENT_DATE) - DAYS(order_date) AS days_since_order
+    FROM orders
+    WHERE customer_id = p_customer_id
+    ORDER BY order_date DESC;
+END;
+
+-- Usage
+SELECT * FROM TABLE(get_customer_orders(12345)) AS t;
+
+-- 6. Journal and Commitment Control
+COMMIT;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+-- 7. Native I/O compatible SQL
+CREATE VIEW order_summary_v AS
+SELECT 
+    customer_id AS CSTID,
+    CHAR(customer_id, 10) AS CSTID_CHAR,
+    total_amount AS ORDAMT,
+    DEC(total_amount * 100, 15, 0) AS ORDAMT_PKD
+FROM orders;
+
+-- 8. Temporal Tables (IBM i 7.3+)
+CREATE TABLE products (
+    product_id INTEGER NOT NULL,
+    name VARCHAR(100),
+    price DECIMAL(10,2),
+    sys_start TIMESTAMP(12) NOT NULL GENERATED ALWAYS 
+        AS ROW BEGIN,
+    sys_end TIMESTAMP(12) NOT NULL GENERATED ALWAYS 
+        AS ROW END,
+    ts_id TIMESTAMP(12) NOT NULL GENERATED ALWAYS 
+        AS TRANSACTION START ID,
+    PERIOD SYSTEM_TIME (sys_start, sys_end),
+    PRIMARY KEY (product_id)
+);
+
+CREATE TABLE products_history LIKE products;
+
+ALTER TABLE products 
+    ADD VERSIONING USE HISTORY TABLE products_history;
+
+-- Query historical data
+SELECT * FROM products 
+FOR SYSTEM_TIME AS OF '2024-01-01-00.00.00.000000'
+WHERE product_id = 100;`;
+
+// MySQL Examples
+const mysqlExamples = `-- MySQL - Modern Features & Best Practices
+-- ========================================
+
+-- 1. Table with JSON and Generated Columns
+CREATE TABLE products (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    sku VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    attributes JSON NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    -- Virtual generated column from JSON
+    brand VARCHAR(100) AS (JSON_UNQUOTE(JSON_EXTRACT(attributes, '$.brand'))) VIRTUAL,
+    -- Stored generated column
+    category VARCHAR(50) AS (JSON_UNQUOTE(attributes->>'$.category')) STORED,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_brand (brand),
+    INDEX idx_category (category),
+    INDEX idx_price (price)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2. Multi-value JSON Index (MySQL 8.0.17+)
+CREATE TABLE orders (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_id BIGINT UNSIGNED NOT NULL,
+    items JSON NOT NULL,
+    tags JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_customer (customer_id),
+    -- Index on JSON array values
+    INDEX idx_tags ((CAST(tags AS CHAR(50) ARRAY)))
+);
+
+-- Query using JSON
+SELECT * FROM orders
+WHERE JSON_CONTAINS(tags, '"urgent"');
+
+SELECT * FROM orders
+WHERE JSON_OVERLAPS(tags, '["priority", "express"]');
+
+-- 3. Window Functions
+SELECT 
+    id,
+    customer_id,
+    order_total,
+    ROW_NUMBER() OVER w AS row_num,
+    RANK() OVER w AS ranking,
+    DENSE_RANK() OVER w AS dense_ranking,
+    SUM(order_total) OVER (
+        PARTITION BY customer_id 
+        ORDER BY created_at
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total,
+    LAG(order_total) OVER w AS prev_order,
+    LEAD(order_total) OVER w AS next_order
+FROM orders
+WINDOW w AS (PARTITION BY customer_id ORDER BY created_at);
+
+-- 4. Common Table Expressions (CTE) with Recursion
+WITH RECURSIVE category_tree AS (
+    -- Base case
+    SELECT 
+        id, 
+        name, 
+        parent_id, 
+        0 AS level,
+        CAST(name AS CHAR(1000)) AS path
+    FROM categories
+    WHERE parent_id IS NULL
+    
+    UNION ALL
+    
+    -- Recursive case
+    SELECT 
+        c.id, 
+        c.name, 
+        c.parent_id, 
+        ct.level + 1,
+        CONCAT(ct.path, ' > ', c.name)
+    FROM categories c
+    INNER JOIN category_tree ct ON c.parent_id = ct.id
+)
+SELECT * FROM category_tree ORDER BY path;
+
+-- 5. Stored Procedure with Error Handling
+DELIMITER //
+
+CREATE PROCEDURE process_order(
+    IN p_order_id BIGINT,
+    OUT p_success BOOLEAN,
+    OUT p_message VARCHAR(255)
+)
+BEGIN
+    DECLARE v_status VARCHAR(20);
+    DECLARE v_total DECIMAL(10,2);
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET p_success = FALSE;
+        GET DIAGNOSTICS CONDITION 1 
+            p_message = MESSAGE_TEXT;
+    END;
+    
+    START TRANSACTION;
+    
+    SELECT status, total INTO v_status, v_total
+    FROM orders WHERE id = p_order_id FOR UPDATE;
+    
+    IF v_status IS NULL THEN
+        SET p_success = FALSE;
+        SET p_message = 'Order not found';
+        ROLLBACK;
+    ELSEIF v_status = 'COMPLETED' THEN
+        SET p_success = FALSE;
+        SET p_message = 'Order already completed';
+        ROLLBACK;
+    ELSE
+        UPDATE orders 
+        SET status = 'PROCESSING' 
+        WHERE id = p_order_id;
+        
+        -- Update inventory
+        UPDATE products p
+        INNER JOIN order_items oi ON p.id = oi.product_id
+        SET p.stock = p.stock - oi.quantity
+        WHERE oi.order_id = p_order_id;
+        
+        COMMIT;
+        SET p_success = TRUE;
+        SET p_message = 'Order processed successfully';
+    END IF;
+END //
+
+DELIMITER ;
+
+-- 6. Event Scheduler
+CREATE EVENT cleanup_old_logs
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP
+DO
+BEGIN
+    DELETE FROM audit_logs 
+    WHERE created_at < DATE_SUB(NOW(), INTERVAL 90 DAY);
+    
+    -- Optimize table after large delete
+    OPTIMIZE TABLE audit_logs;
+END;
+
+-- 7. User and Role Management
+CREATE ROLE 'app_read', 'app_write', 'app_admin';
+
+GRANT SELECT ON myapp.* TO 'app_read';
+GRANT INSERT, UPDATE, DELETE ON myapp.* TO 'app_write';
+GRANT ALL PRIVILEGES ON myapp.* TO 'app_admin';
+
+CREATE USER 'api_service'@'%' IDENTIFIED BY 'SecureP@ss123!';
+GRANT 'app_read', 'app_write' TO 'api_service'@'%';
+SET DEFAULT ROLE 'app_read', 'app_write' TO 'api_service'@'%';
+
+-- 8. Partitioning by Range
+CREATE TABLE order_archive (
+    id BIGINT UNSIGNED NOT NULL,
+    customer_id BIGINT UNSIGNED NOT NULL,
+    order_date DATE NOT NULL,
+    total DECIMAL(10,2),
+    PRIMARY KEY (id, order_date)
+)
+PARTITION BY RANGE (YEAR(order_date)) (
+    PARTITION p2022 VALUES LESS THAN (2023),
+    PARTITION p2023 VALUES LESS THAN (2024),
+    PARTITION p2024 VALUES LESS THAN (2025),
+    PARTITION p2025 VALUES LESS THAN (2026),
+    PARTITION p_future VALUES LESS THAN MAXVALUE
+);`;
+
+// SQL Server Examples
+const sqlServerExamples = `-- SQL Server - Modern T-SQL Features
+-- ====================================
+
+-- 1. Table with Temporal (System-Versioned)
+CREATE TABLE employees (
+    employee_id INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL,
+    department NVARCHAR(50),
+    salary DECIMAL(10,2),
+    -- Temporal columns
+    valid_from DATETIME2 GENERATED ALWAYS AS ROW START NOT NULL,
+    valid_to DATETIME2 GENERATED ALWAYS AS ROW END NOT NULL,
+    PERIOD FOR SYSTEM_TIME (valid_from, valid_to)
+)
+WITH (SYSTEM_VERSIONING = ON (
+    HISTORY_TABLE = dbo.employees_history,
+    HISTORY_RETENTION_PERIOD = 1 YEAR
+));
+
+-- Query historical data
+SELECT * FROM employees 
+FOR SYSTEM_TIME AS OF '2024-01-15T00:00:00'
+WHERE department = 'Engineering';
+
+SELECT * FROM employees 
+FOR SYSTEM_TIME BETWEEN '2024-01-01' AND '2024-06-30';
+
+-- 2. JSON Functions
+CREATE TABLE orders (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    customer_id INT NOT NULL,
+    order_data NVARCHAR(MAX) CHECK (ISJSON(order_data) = 1),
+    created_at DATETIME2 DEFAULT SYSDATETIME()
+);
+
+-- Query JSON
+SELECT 
+    id,
+    JSON_VALUE(order_data, '$.customer.name') AS customer_name,
+    JSON_VALUE(order_data, '$.total') AS total,
+    JSON_QUERY(order_data, '$.items') AS items
+FROM orders
+WHERE JSON_VALUE(order_data, '$.status') = 'pending';
+
+-- Cross apply with OPENJSON
+SELECT o.id, items.*
+FROM orders o
+CROSS APPLY OPENJSON(o.order_data, '$.items')
+WITH (
+    product_id INT '$.productId',
+    quantity INT '$.quantity',
+    price DECIMAL(10,2) '$.price'
+) AS items;
+
+-- 3. Window Functions with ROWS/RANGE
+SELECT 
+    order_id,
+    customer_id,
+    order_date,
+    total,
+    -- Running total
+    SUM(total) OVER (
+        PARTITION BY customer_id 
+        ORDER BY order_date 
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total,
+    -- Moving average (last 3 orders)
+    AVG(total) OVER (
+        PARTITION BY customer_id 
+        ORDER BY order_date 
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS moving_avg,
+    -- First and last order amounts
+    FIRST_VALUE(total) OVER (
+        PARTITION BY customer_id 
+        ORDER BY order_date
+    ) AS first_order_total,
+    LAST_VALUE(total) OVER (
+        PARTITION BY customer_id 
+        ORDER BY order_date
+        ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING
+    ) AS last_order_total
+FROM orders;
+
+-- 4. Stored Procedure with TRY/CATCH and Transactions
+CREATE PROCEDURE dbo.ProcessOrder
+    @OrderId INT,
+    @Result INT OUTPUT,
+    @Message NVARCHAR(255) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    
+    DECLARE @Status NVARCHAR(20);
+    DECLARE @Total DECIMAL(10,2);
+    
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        
+        SELECT @Status = status, @Total = total
+        FROM orders WITH (UPDLOCK, HOLDLOCK)
+        WHERE id = @OrderId;
+        
+        IF @Status IS NULL
+        BEGIN
+            SET @Result = -1;
+            SET @Message = N'Order not found';
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+        
+        IF @Status = 'COMPLETED'
+        BEGIN
+            SET @Result = -2;
+            SET @Message = N'Order already completed';
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+        
+        UPDATE orders 
+        SET status = 'PROCESSING',
+            processed_at = SYSDATETIME()
+        WHERE id = @OrderId;
+        
+        -- Update inventory
+        UPDATE p
+        SET p.stock = p.stock - oi.quantity
+        FROM products p
+        INNER JOIN order_items oi ON p.id = oi.product_id
+        WHERE oi.order_id = @OrderId;
+        
+        COMMIT TRANSACTION;
+        SET @Result = 0;
+        SET @Message = N'Order processed successfully';
+        
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+            
+        SET @Result = -99;
+        SET @Message = ERROR_MESSAGE();
+        
+        -- Log error
+        INSERT INTO error_log (procedure_name, error_number, error_message, error_line)
+        VALUES ('ProcessOrder', ERROR_NUMBER(), ERROR_MESSAGE(), ERROR_LINE());
+    END CATCH
+END;
+
+-- 5. Row Level Security
+CREATE SCHEMA Security;
+GO
+
+CREATE FUNCTION Security.fn_customer_access(@CustomerId INT)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN SELECT 1 AS access_result
+WHERE 
+    -- Admins see all
+    IS_MEMBER('db_owner') = 1
+    OR IS_MEMBER('admin_role') = 1
+    -- Users see own data
+    OR @CustomerId = CAST(SESSION_CONTEXT(N'customer_id') AS INT);
+GO
+
+CREATE SECURITY POLICY CustomerPolicy
+ADD FILTER PREDICATE Security.fn_customer_access(customer_id)
+    ON dbo.orders,
+ADD BLOCK PREDICATE Security.fn_customer_access(customer_id)
+    ON dbo.orders AFTER INSERT
+WITH (STATE = ON);
+
+-- Set session context (call from application)
+EXEC sp_set_session_context @key = N'customer_id', @value = 12345;
+
+-- 6. Columnstore Index for Analytics
+CREATE NONCLUSTERED COLUMNSTORE INDEX ix_orders_columnstore
+ON orders (customer_id, order_date, total, status);
+
+-- 7. Memory-Optimized Tables (In-Memory OLTP)
+CREATE TABLE dbo.sessions (
+    session_id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY NONCLUSTERED,
+    user_id INT NOT NULL,
+    data NVARCHAR(MAX),
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    expires_at DATETIME2 NOT NULL,
+    INDEX ix_user HASH (user_id) WITH (BUCKET_COUNT = 100000)
+)
+WITH (
+    MEMORY_OPTIMIZED = ON,
+    DURABILITY = SCHEMA_AND_DATA
+);`;
+
+// Flyway Migration Examples
+const flywayMigrations = `-- Flyway - Database Version Control
+-- ==================================
+
+-- File: V1__initial_schema.sql
+-- ============================
+-- Initial database structure
+
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    name VARCHAR(100),
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT
+);
+
+CREATE TABLE user_roles (
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    role_id INT REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, role_id)
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_status ON users(status);
+
+-- Initial data
+INSERT INTO roles (name, description) VALUES 
+    ('admin', 'Administrator with full access'),
+    ('user', 'Regular user'),
+    ('moderator', 'Content moderator');
+
+-- File: V2__add_products.sql
+-- ==========================
+-- Add product catalog tables
+
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL UNIQUE,
+    parent_id INT REFERENCES categories(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE products (
+    id BIGSERIAL PRIMARY KEY,
+    sku VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    category_id INT REFERENCES categories(id),
+    stock INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_products_category ON products(category_id);
+CREATE INDEX idx_products_sku ON products(sku);
+CREATE INDEX idx_products_active ON products(is_active) WHERE is_active = true;
+
+-- File: V3__add_orders.sql
+-- ========================
+-- Order management tables
+
+CREATE TYPE order_status AS ENUM (
+    'pending', 'confirmed', 'processing', 
+    'shipped', 'delivered', 'cancelled'
+);
+
+CREATE TABLE orders (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    status order_status DEFAULT 'pending',
+    total_amount DECIMAL(12,2) NOT NULL,
+    shipping_address JSONB,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE order_items (
+    id BIGSERIAL PRIMARY KEY,
+    order_id BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    product_id BIGINT NOT NULL REFERENCES products(id),
+    quantity INT NOT NULL CHECK (quantity > 0),
+    unit_price DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) GENERATED ALWAYS AS (quantity * unit_price) STORED
+);
+
+CREATE INDEX idx_orders_user ON orders(user_id);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_created ON orders(created_at DESC);
+CREATE INDEX idx_order_items_order ON order_items(order_id);
+
+-- File: V4__add_audit_trigger.sql
+-- ===============================
+-- Audit logging with trigger
+
+CREATE TABLE audit_log (
+    id BIGSERIAL PRIMARY KEY,
+    table_name VARCHAR(100) NOT NULL,
+    record_id BIGINT NOT NULL,
+    action VARCHAR(10) NOT NULL,
+    old_data JSONB,
+    new_data JSONB,
+    changed_by BIGINT,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE OR REPLACE FUNCTION audit_trigger_func()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO audit_log (table_name, record_id, action, new_data, changed_by)
+        VALUES (TG_TABLE_NAME, NEW.id, 'INSERT', to_jsonb(NEW), 
+                current_setting('app.user_id', true)::BIGINT);
+        RETURN NEW;
+    ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO audit_log (table_name, record_id, action, old_data, new_data, changed_by)
+        VALUES (TG_TABLE_NAME, NEW.id, 'UPDATE', to_jsonb(OLD), to_jsonb(NEW),
+                current_setting('app.user_id', true)::BIGINT);
+        RETURN NEW;
+    ELSIF TG_OP = 'DELETE' THEN
+        INSERT INTO audit_log (table_name, record_id, action, old_data, changed_by)
+        VALUES (TG_TABLE_NAME, OLD.id, 'DELETE', to_jsonb(OLD),
+                current_setting('app.user_id', true)::BIGINT);
+        RETURN OLD;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER orders_audit_trigger
+    AFTER INSERT OR UPDATE OR DELETE ON orders
+    FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+
+-- File: V5__add_performance_indexes.sql
+-- =====================================
+-- Performance optimization indexes
+
+-- Partial indexes
+CREATE INDEX idx_orders_pending ON orders(created_at) 
+    WHERE status = 'pending';
+
+CREATE INDEX idx_products_low_stock ON products(stock) 
+    WHERE stock < 10 AND is_active = true;
+
+-- Covering index for common query
+CREATE INDEX idx_order_items_covering ON order_items(order_id) 
+    INCLUDE (product_id, quantity, unit_price);
+
+-- GIN index for JSONB search
+CREATE INDEX idx_orders_shipping_address ON orders 
+    USING GIN (shipping_address);
+
+-- BRIN index for time-series data
+CREATE INDEX idx_audit_log_time ON audit_log 
+    USING BRIN (changed_at);
+
+-- File: R__views.sql (Repeatable Migration)
+-- =========================================
+-- Views are recreated on every change
+
+CREATE OR REPLACE VIEW v_order_summary AS
+SELECT 
+    o.id AS order_id,
+    u.email AS customer_email,
+    u.name AS customer_name,
+    o.status,
+    o.total_amount,
+    COUNT(oi.id) AS item_count,
+    o.created_at
+FROM orders o
+JOIN users u ON o.user_id = u.id
+JOIN order_items oi ON o.id = oi.order_id
+GROUP BY o.id, u.email, u.name;
+
+CREATE OR REPLACE VIEW v_product_inventory AS
+SELECT 
+    p.id,
+    p.sku,
+    p.name,
+    p.price,
+    p.stock,
+    c.name AS category,
+    CASE 
+        WHEN p.stock = 0 THEN 'out_of_stock'
+        WHEN p.stock < 10 THEN 'low_stock'
+        ELSE 'in_stock'
+    END AS stock_status
+FROM products p
+LEFT JOIN categories c ON p.category_id = c.id
+WHERE p.is_active = true;`;
+
+// Flyway Configuration and Commands
+const flywayConfig = `# Flyway Configuration & Commands Reference
+# ==========================================
+
+# =====================
+# flyway.conf (Project)
+# =====================
+flyway.url=jdbc:postgresql://localhost:5432/myapp
+flyway.user=\${DB_USER}
+flyway.password=\${DB_PASSWORD}
+flyway.schemas=public
+flyway.locations=filesystem:./db/migrations
+flyway.baselineOnMigrate=true
+flyway.baselineVersion=0
+flyway.validateOnMigrate=true
+flyway.cleanDisabled=true
+
+# Naming patterns
+flyway.sqlMigrationPrefix=V
+flyway.repeatableSqlMigrationPrefix=R
+flyway.sqlMigrationSeparator=__
+flyway.sqlMigrationSuffixes=.sql
+
+# Placeholders
+flyway.placeholders.schema_name=public
+flyway.placeholders.table_prefix=app_
+
+# ================================
+# Spring Boot application.yml
+# ================================
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: '0'
+    validate-on-migrate: true
+    # For different databases per environment
+    url: \${DATABASE_URL}
+    user: \${DATABASE_USER}
+    password: \${DATABASE_PASSWORD}
+    # Placeholders
+    placeholders:
+      schema: \${DB_SCHEMA:public}
+
+# ================================
+# Maven pom.xml
+# ================================
+<plugin>
+    <groupId>org.flywaydb</groupId>
+    <artifactId>flyway-maven-plugin</artifactId>
+    <version>10.0.0</version>
+    <configuration>
+        <url>jdbc:postgresql://localhost:5432/myapp</url>
+        <user>\${env.DB_USER}</user>
+        <password>\${env.DB_PASSWORD}</password>
+        <locations>
+            <location>filesystem:src/main/resources/db/migration</location>
+        </locations>
+    </configuration>
+    <dependencies>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.1</version>
+        </dependency>
+    </dependencies>
+</plugin>
+
+# ================================
+# Commands Reference
+# ================================
+
+# Migrate - Apply pending migrations
+flyway migrate
+mvn flyway:migrate
+./gradlew flywayMigrate
+
+# Info - Show migration status
+flyway info
+mvn flyway:info
+
+# Validate - Check migrations match
+flyway validate
+mvn flyway:validate
+
+# Baseline - Mark existing DB
+flyway baseline -baselineVersion=1
+mvn flyway:baseline -Dflyway.baselineVersion=1
+
+# Repair - Fix failed migrations
+flyway repair
+mvn flyway:repair
+
+# Clean - Drop all objects (DANGEROUS!)
+flyway clean
+# Requires: flyway.cleanDisabled=false
+
+# Undo (Teams Edition) - Rollback
+flyway undo
+flyway undo -target=3
+
+# ================================
+# CI/CD Pipeline Example (.gitlab-ci.yml)
+# ================================
+stages:
+  - validate
+  - migrate
+
+flyway-validate:
+  stage: validate
+  image: flyway/flyway:10
+  script:
+    - flyway -url=$DATABASE_URL -user=$DB_USER -password=$DB_PASSWORD validate
+  only:
+    - merge_requests
+
+flyway-migrate:
+  stage: migrate
+  image: flyway/flyway:10
+  script:
+    - flyway -url=$DATABASE_URL -user=$DB_USER -password=$DB_PASSWORD migrate
+  only:
+    - main
+  environment:
+    name: production
+
+# ================================
+# Docker Usage
+# ================================
+# Run migrations with Docker
+docker run --rm \\
+  -v $(pwd)/db/migrations:/flyway/sql \\
+  -e FLYWAY_URL=jdbc:postgresql://host.docker.internal:5432/myapp \\
+  -e FLYWAY_USER=postgres \\
+  -e FLYWAY_PASSWORD=secret \\
+  flyway/flyway:10 migrate
+
+# Docker Compose
+services:
+  flyway:
+    image: flyway/flyway:10
+    command: migrate
+    volumes:
+      - ./db/migrations:/flyway/sql
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://db:5432/myapp
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=secret
+    depends_on:
+      db:
+        condition: service_healthy
+
+# ================================
+# Best Practices
+# ================================
+# 1. Never modify applied migrations
+# 2. Use descriptive names: V1__create_users_table.sql
+# 3. Keep migrations small and focused
+# 4. Use transactions (PostgreSQL auto-wraps)
+# 5. Test migrations in CI before production
+# 6. Use repeatable migrations (R__) for views/functions
+# 7. Version callbacks for complex scenarios`;
+
 const categories = [
   {
     id: "oracle-collections",
@@ -1126,6 +2011,39 @@ const categories = [
     badge: "Security",
     examples: [
       { title: "RLS Policies & Multi-tenant", code: postgresRLS, filename: "rls_policies.sql" },
+    ]
+  },
+  {
+    id: "db2-as400",
+    title: "DB2 for AS400 / IBM i",
+    badge: "DB2",
+    examples: [
+      { title: "SQL, Procedures & Temporal Tables", code: db2AS400, filename: "db2_as400.sql" },
+    ]
+  },
+  {
+    id: "mysql-examples",
+    title: "MySQL Modern Features",
+    badge: "MySQL",
+    examples: [
+      { title: "JSON, CTEs, Partitions & Procedures", code: mysqlExamples, filename: "mysql_examples.sql" },
+    ]
+  },
+  {
+    id: "sqlserver-examples",
+    title: "SQL Server T-SQL",
+    badge: "SQL Server",
+    examples: [
+      { title: "Temporal, JSON, RLS & Memory-Optimized", code: sqlServerExamples, filename: "sqlserver_examples.sql" },
+    ]
+  },
+  {
+    id: "flyway-migrations",
+    title: "Flyway Version Control",
+    badge: "Migrations",
+    examples: [
+      { title: "Migration Examples", code: flywayMigrations, filename: "migrations.sql" },
+      { title: "Configuration & Commands", code: flywayConfig, filename: "flyway.conf" },
     ]
   },
 ];
