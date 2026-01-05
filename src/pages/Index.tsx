@@ -6,6 +6,7 @@ import GitHubProjectsSection from "@/components/GitHubProjectsSection";
 import BestPracticesSection from "@/components/BestPracticesSection";
 import DatabaseSection from "@/components/DatabaseSection";
 import ToolsSection from "@/components/ToolsSection";
+import AIDevSection from "@/components/AIDevSection";
 import DockerSection from "@/components/DockerSection";
 import ContactSection from "@/components/ContactSection";
 
@@ -21,6 +22,7 @@ const Index = () => {
         <BestPracticesSection />
         <DatabaseSection />
         <ToolsSection />
+        <AIDevSection />
         <DockerSection />
         <ContactSection />
       </main>
