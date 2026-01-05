@@ -8,6 +8,7 @@ import DatabaseSection from "@/components/DatabaseSection";
 import ToolsSection from "@/components/ToolsSection";
 import AIDevSection from "@/components/AIDevSection";
 import DockerSection from "@/components/DockerSection";
+import SmartContractsSection from "@/components/SmartContractsSection";
 import ContactSection from "@/components/ContactSection";
 
 const Index = () => {
@@ -23,6 +24,7 @@ const Index = () => {
         <DatabaseSection />
         <ToolsSection />
         <AIDevSection />
+        <SmartContractsSection />
         <DockerSection />
         <ContactSection />
       </main>
