@@ -18,7 +18,7 @@ const skills = [
   {
     icon: Database,
     title: "Databases",
-    description: "Oracle, PostgreSQL, DB2/AS400, MySQL, SQL Server, and PL/SQL",
+    description: "Oracle, PostgreSQL, DB2/AS400, MySQL, SQL Server, Flyway migrations",
     color: "text-terminal-yellow",
   },
   {
